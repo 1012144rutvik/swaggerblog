@@ -1,0 +1,371 @@
+openapi: 3.0.0
+info:
+  title: DocumentManagementSystem API'S
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+paths:
+  /client-api/v1/auth/login:
+    post:
+      summary: User Login access
+      description: This accress is user login
+      tags: 
+        - Authentication
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: login successfully response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/400BedRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+  /client-api/v1/auth/registration:
+    post:
+      summary: User Registration
+      description: User Registration api
+      tags: 
+        - Authentication
+      operationId: registrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        '201':
+          description: User Registration Successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+        '400':
+          $ref: '#/components/responses/400BedRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+  /client-api/v1/auth/token/refresh:
+    post:
+      summary: Access token regenerate
+      description: Generate a new access token using a refresh token.
+      tags:
+        - Authentication
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        '200':
+          description: Access token successfully generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          $ref: '#/components/responses/400BedRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+  /client-api/v1/auth/resend:
+    post:
+      summary: resend otp
+      description: otp resend api
+      tags: 
+        - Authentication
+      operationId: resendOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendOtpRequest'
+      responses:
+        '200':
+          description: otp resend successfully
+          content:
+            appication/json:
+              schema:
+                $ref: '#/components/schemas/ResendOtpResponse'
+        '400':
+          $ref: '#/components/responses/400BedRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+  /client-api/v1/auth/verify-otp:
+    post:
+      summary: verification otp
+      description: email otp verification apis
+      tags: 
+        - Authentication
+      operationId: verifyOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOtpRequest'
+      responses:
+        '200':
+          description: otp verification successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyOtpResponse'
+        '400':
+          $ref: '#/components/responses/400BedRequest'
+        '410':
+          $ref: '#/components/responses/410OtpExpire'
+        '429':
+          $ref: '#/components/responses/429MaximumOtpAttempts'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+  /client-api/v1/auth/role:
+    get:
+      summary: Role details
+      description: Role details api's
+      tags: 
+        - Authentication
+      operationId: roleinformation
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: size
+          in: query
+          description: Page number
+          required: true
+          schema:
+            type: integer
+            example: 5
+      responses:
+        '200':
+          description: otp verification successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleData'
+components:
+  responses:
+    '500InternalServerError':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+              $ref: '#/components/schemas/InternalServerError'
+    '401Unauthorized':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Unauthorized'
+    '403Forbidden':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Forbidden'
+    '400BedRequest':
+      description: BedRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BadRequest'
+    '410OtpExpire':
+      description: expired otp
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpExpire'
+    '429MaximumOtpAttempts':
+      description: Maximum OTP attempts
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MaximumOtpAttempts'
+  schemas:
+    MaximumOtpAttempts:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Maximum OTP attempts exceeded. Please request a new OTP
+    BadRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Invalid RequestBody
+    OtpExpire:
+      type: object
+      properties:
+        message: 
+          type: string
+          example: Invalid or expired OTP
+    InternalServerError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Internal server error
+    Forbidden:
+      type: object
+      properties:
+        message:
+          type: string
+          example: You do not have permission to perform this action.
+    Unauthorized:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Error message indicating the token issue
+          example: Given token not valid for any token type
+        code:
+          type: string
+          description: Error code indicating the nature of the issue
+          example: token_not_valid
+        messages:
+          type: array
+          description: Detailed information about the token validation error
+          items:
+            type: object
+            properties:
+              token_class:
+                type: string
+                description: Class of the token (e.g., AccessToken)
+                example: AccessToken
+              token_type:
+                type: string
+                description: Type of the token (e.g., access)
+                example: access
+              message:
+                type: string
+                description: Message describing the token issue
+                example: Token is invalid or expired
+    VerifyOtpRequest:
+      type: object
+      properties:
+        userId:
+          format: uuid
+          type: string
+        otp:
+          type: string
+          example: 439133
+    LoginRequest:
+      type: object
+      properties:
+        emailOrUsername:
+          type: string
+          example: usernamepremail.com
+        password:
+          type: string
+          example: 123
+    LoginResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: 37ad2d21-4435-49b5-934e-d1ec8f1a7b56
+        message:
+          type: string
+          example: OTP sent to your email. Please verify to complete login
+        challenge:
+          type: string
+          example: 2fa
+    RegistrationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: User registered successfully
+    RegistrationRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: example
+        email:
+          type: string
+          example: example@gmail.com
+        password:
+          type: string
+          example: 123
+        mobileNo:
+          type: string
+          example: 99999999
+        first_name:
+          type: string
+          example: test
+        last_name:
+          type: string
+          example: test
+        dateOfBirth:
+          type: string
+          format: date
+        role:
+          type: integer
+          example: 1
+        group:
+          type: string
+          example: User
+    VerifyOtpResponse:
+      type: object
+      properties:
+        refresh:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        access:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    ResendOtpRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: 37ad2d21-4435-49b5-934e-d1ec8f1a7b56
+    ResendOtpResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: OTP resent successfully
+        userId: 
+          type: string
+          example: 37ad2d21-4435-49b5-934e-d1ec8f1a7b56
+    RoleData:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 2
+        resultset:
+          type: array
+          items:
+            type: object
+            properties:
+              roleId:
+                type: integer
+                example: 1
+              roleName:
+                type: string
+                example: User
